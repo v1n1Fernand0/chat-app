@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat em Tempo Real</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        .chat-container { max-width: 600px; margin: 50px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .messages { border: 1px solid #ddd; padding: 10px; height: 300px; overflow-y: scroll; }
+        .message { margin-bottom: 10px; }
+        .message span { font-weight: bold; }
+        .input-group { margin-top: 10px; }
+        .input-group input, .input-group button { padding: 10px; font-size: 16px; }
+        .input-group input { width: calc(100% - 100px); border: 1px solid #ddd; border-radius: 4px; }
+        .input-group button { width: 80px; border: none; background: #007BFF; color: #fff; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chat em Tempo Real</h2>
+        <div class="messages" id="messages"></div>
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Seu nome" />
+        </div>
+        <div class="input-group">
+            <input type="text" id="message" placeholder="Sua mensagem" />
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8081/ws");
+
+        ws.onmessage = function(event) {
+            const msg = JSON.parse(event.data);
+            const messages = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.classList.add('message');
+            message.innerHTML = `<span>${msg.username}:</span> ${msg.message}`;
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+        };
+
+        function sendMessage() {
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('message').value;
+            if (username && message) {
+                ws.send(JSON.stringify({username: username, message: message}));
+                document.getElementById('message').value = '';
+            } else {
+                alert('Por favor, preencha seu nome e mensagem.');
+            }
+        }
+    </script>
+</body>
+</html>
